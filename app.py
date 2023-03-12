@@ -27,7 +27,16 @@ if not os.path.exists(UPLOAD_DIRECTORY):
 
 with st.sidebar:
     selected = option_menu(None, ["Home", 'View','2D Model', '3D Model'], 
-        icons=['house', 'eye-fill','','badge-3d-fill'], menu_icon="cast",default_index=0)
+        icons=['house', 'eye-fill','','badge-3d-fill'], menu_icon="cast",default_index=0,
+          styles={
+            "container": {"padding": "0!important", "background-color": "#fafafa"},
+            "icon": { "font-size": "25px"}, 
+            "nav-link": { "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
+            "nav-link-selected": {},
+            "menu-icon": {"display":"none","font-size": "25px"},
+            "menu-title" : {"font-size": "25px"}
+        }
+        )
     selected
 st.sidebar.success("")
 

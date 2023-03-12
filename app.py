@@ -4,7 +4,9 @@ import nibabel as nib
 
 from streamlit import session_state
 from streamlit_option_menu import option_menu
-from utils.view import plot_slice
+from utils.view import plot_slice, plot_image_label
+from utils.load import load_model
+from utils.transform import transformInput
 
 st.set_page_config(
     page_title="Doc ASk",
@@ -15,18 +17,25 @@ st.set_page_config(
 
 # Define a directory to save the uploaded NIfTI files
 UPLOAD_DIRECTORY = "./images"
-
+model_path = './saved_models/3D_Models/best_metric_model.pth'
 
 # Create the directory if it doesn't already exist
 if not os.path.exists(UPLOAD_DIRECTORY):
     os.makedirs(UPLOAD_DIRECTORY)
 
 
+
 with st.sidebar:
     selected = option_menu(None, ["Home", 'View','2D Model', '3D Model'], 
-        icons=['house', 'eye-fill','','badge-3d-fill'], menu_icon="cast", default_index=0)
+        icons=['house', 'eye-fill','','badge-3d-fill'], menu_icon="cast",default_index=0)
     selected
 st.sidebar.success("")
+
+# # horizontal Menu
+# selected = option_menu(None, ["Home", 'View','2D Model', '3D Model'], 
+#     icons=['house', 'eye-fill','','badge-3d-fill'], 
+#     menu_icon="cast", default_index=0, orientation="horizontal")
+
 
 if selected == 'Home':   
     # Add a file uploader widget to the Streamlit app
@@ -64,5 +73,21 @@ if selected == 'View':
     else:
         st.write("Yet to upload a file")
 
-if selected == '3D':
-    st.write("")
+if selected == '2D Model':
+    st.title("Predicted By 2D Model")
+
+if selected == '3D Model':
+    st.title("Predicted By 3D Model")
+    if 'file_path' in session_state and session_state.file_path:
+        model = load_model(model_path)
+        nifti_image = nib.load(session_state.file_path)
+        image_data = nifti_image.get_fdata()
+        transformed_image = transformInput(image_data)
+        
+        label = model(transformed_image)
+        
+        st.text(label.shape)
+        session_state.labeled = True
+        plot_image_label(transformed_image, label)
+    else:
+        st.write("Yet to upload a file")

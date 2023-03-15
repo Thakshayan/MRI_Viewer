@@ -37,7 +37,7 @@ with st.sidebar:
             "menu-title" : {"font-size": "25px"}
         }
         )
-    selected
+    
 st.sidebar.success("")
 
 # # horizontal Menu
@@ -86,8 +86,16 @@ if selected == '2D Model':
     st.title("Predicted By 2D Model")
 
 if selected == '3D Model':
+    
+    selectedZone = option_menu(None, ["Prostate", 'Central Gland','Lesion'], 
+            icons=['', '','',''], 
+            menu_icon="cast", default_index=0, orientation="horizontal")
+    
     st.title("Predicted By 3D Model")
     if 'file_path' in session_state and session_state.file_path:
+        # # horizontal Menu
+       
+        
         model = load_model(model_path)
         nifti_image = nib.load(session_state.file_path)
         image_data = nifti_image.get_fdata()

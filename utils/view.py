@@ -33,10 +33,10 @@ def plot_image_label(image, label):
 
     # Set alpha channel of label image
     alpha = np.zeros_like(slice_label)
-    alpha[slice_label > 0.5] = 0.4
+    alpha[slice_label > 0.7] = 0.4
 
     # Display label image
-    ax.imshow(slice_label, cmap='Reds', alpha=alpha)
+    ax.imshow(slice_label, cmap='jet', alpha=alpha)
 
     # Add colorbar for label image
     #cbar = plt.colorbar(ax.imshow(label, cmap='jet', alpha=1))

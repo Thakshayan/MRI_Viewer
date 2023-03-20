@@ -2,14 +2,12 @@ import numpy as np
 from monai.transforms import Compose, AddChanneld,Orientationd,Resized,ToTensor, ScaleIntensityRanged,CropForegroundd, ToTensord
 import torch
 
-def transformInput(numpy_image):
+def transform(numpy_image, spatial_size):
     # Example numpy array with shape (H, W)
 
     pixdim =(1.5, 1.5, 1.0)
     a_min=0
     a_max=500
-    spatial_size= [128, 128,16] #[384, 384,18]
-    central_slice_size = [128, 128,1]
 
     transformations = Compose([
         lambda x: {"image": x, "label": None},

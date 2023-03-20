@@ -6,7 +6,7 @@ from streamlit import session_state
 from streamlit_option_menu import option_menu
 from utils.view import plot_slice, plot_image_label
 from utils.load import load_model
-from utils.transform import transformInput
+from utils.transform import transform
 
 st.set_page_config(
     page_title="Doc ASk",
@@ -17,7 +17,7 @@ st.set_page_config(
 
 # Define a directory to save the uploaded NIfTI files
 UPLOAD_DIRECTORY = "./images"
-model_path = './saved_models/3D_Models/best_metric_model.pth'
+
 
 # Create the directory if it doesn't already exist
 if not os.path.exists(UPLOAD_DIRECTORY):
@@ -83,23 +83,82 @@ if selected == 'View':
         st.write("Yet to upload a file")
 
 if selected == '2D Model':
+    selectedZone = option_menu(None, ["Prostate", 'Pheripheral','Transition'], 
+            icons=['', '','',''], 
+            menu_icon="cast", default_index=0, orientation="horizontal"
+            )
+    
     st.title("Predicted By 2D Model")
+    if 'file_path' in session_state and session_state.file_path:
+        # # horizontal Menu
+       
+        if selectedZone == 'Prostate':
+            model_path = './saved_models/2D_Models/prostate/best_metric_model.pth'
+            model = load_model(model_path)
+            nifti_image = nib.load(session_state.file_path)
+            image_data = nifti_image.get_fdata()
+            spatial_size = [128, 128]
+            transformed_image = transform(image_data, spatial_size)
+            
+            label = model(transformed_image)
+            
+            st.text(label.shape)
+            session_state.labeled = True
+            plot_image_label(transformed_image, label)
+        if selectedZone == 'Pheripheral':
+            model_path = './saved_models/2D_Models/pheripheral/best_metric_model.pth'
+            model = load_model(model_path)
+            nifti_image = nib.load(session_state.file_path)
+            image_data = nifti_image.get_fdata()
+            spatial_size = [128, 128]
+            transformed_image = transform(image_data, spatial_size)
+            
+            label = model(transformed_image)
+            
+            st.text(label.shape)
+            session_state.labeled = True
+            plot_image_label(transformed_image, label)
+        if selectedZone == 'Transition':
+            model_path = './saved_models/2D_Models/transition/best_metric_model.pth'
+            model = load_model(model_path)
+            nifti_image = nib.load(session_state.file_path)
+            image_data = nifti_image.get_fdata()
+            spatial_size = [128, 128]
+            transformed_image = transform(image_data, spatial_size)
+            
+            label = model(transformed_image)
+            
+            st.text(label.shape)
+            session_state.labeled = True
+            plot_image_label(transformed_image, label)
+        
+        
+    else:
+        st.write("Yet to upload a file")
 
 if selected == '3D Model':
     
-    selectedZone = option_menu(None, ["Prostate", 'Central Gland','Lesion'], 
+    selectedZone = option_menu(None, ["Prostate", 'Pheripheral','Transition'], 
             icons=['', '','',''], 
-            menu_icon="cast", default_index=0, orientation="horizontal")
+            menu_icon="cast", default_index=0, orientation="horizontal"
+            )
     
     st.title("Predicted By 3D Model")
     if 'file_path' in session_state and session_state.file_path:
         # # horizontal Menu
        
+        if selectedZone == 'Prostate':
+            model_path = './saved_models/3D_Models/prostate/best_metric_model.pth'
+        if selectedZone == 'Pheripheral':
+            model_path = './saved_models/3D_Models/pheripheral/best_metric_model.pth'
+        if selectedZone == 'Transition':
+            model_path = './saved_models/3D_Models/transition/best_metric_model.pth'
         
         model = load_model(model_path)
         nifti_image = nib.load(session_state.file_path)
         image_data = nifti_image.get_fdata()
-        transformed_image = transformInput(image_data)
+        spatial_size = [128, 128, 16]
+        transformed_image = transform(image_data, spatial_size)
         
         label = model(transformed_image)
         

@@ -18,7 +18,7 @@ def load_model(model_path):
     ).to(device)
     if (os.path.exists(model_path)):
         model.load_state_dict(torch.load(
-        os.path.join(model_path),map_location=device))
+        os.path.join(model_path)))
     return model
 
 

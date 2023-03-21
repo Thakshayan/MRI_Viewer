@@ -1,11 +1,12 @@
 import streamlit as st
 import os
 import nibabel as nib
+import numpy as np
 
 from streamlit import session_state
 from streamlit_option_menu import option_menu
-from utils.view import plot_slice, plot_image_label
-from utils.load import load_model
+from utils.view import plot_slice, plot_image_label, plot_2D_image_label
+from utils.load import load_model, load_model2D
 from utils.transform import transform
 
 st.set_page_config(
@@ -94,43 +95,30 @@ if selected == '2D Model':
        
         if selectedZone == 'Prostate':
             model_path = './saved_models/2D_Models/prostate/best_metric_model.pth'
-            model = load_model(model_path)
-            nifti_image = nib.load(session_state.file_path)
-            image_data = nifti_image.get_fdata()
-            spatial_size = [128, 128]
-            transformed_image = transform(image_data, spatial_size)
-            
-            label = model(transformed_image)
-            
-            st.text(label.shape)
-            session_state.labeled = True
-            plot_image_label(transformed_image, label)
         if selectedZone == 'Pheripheral':
             model_path = './saved_models/2D_Models/pheripheral/best_metric_model.pth'
-            model = load_model(model_path)
-            nifti_image = nib.load(session_state.file_path)
-            image_data = nifti_image.get_fdata()
-            spatial_size = [128, 128]
-            transformed_image = transform(image_data, spatial_size)
-            
-            label = model(transformed_image)
-            
-            st.text(label.shape)
-            session_state.labeled = True
-            plot_image_label(transformed_image, label)
         if selectedZone == 'Transition':
             model_path = './saved_models/2D_Models/transition/best_metric_model.pth'
-            model = load_model(model_path)
-            nifti_image = nib.load(session_state.file_path)
-            image_data = nifti_image.get_fdata()
+        model = load_model2D(model_path)
+        nifti_image = nib.load(session_state.file_path)
+        image_data = nifti_image.get_fdata()
+
+        total_slize_size = image_data.shape[2]
+        image_slices = np.split(image_data, total_slize_size, axis=2)
+        
+        labels = []
+        images = []
+
+        for i in range(total_slize_size):
+            newimg = image_slices[i].squeeze() 
             spatial_size = [128, 128]
-            transformed_image = transform(image_data, spatial_size)
+            transformed_image = transform(newimg, spatial_size)
             
             label = model(transformed_image)
-            
-            st.text(label.shape)
-            session_state.labeled = True
-            plot_image_label(transformed_image, label)
+            images.append(transformed_image)
+            labels.append(label)
+        plot_2D_image_label(images, labels)
+        
         
         
     else:

@@ -26,5 +26,6 @@ def transform(numpy_image, spatial_size):
     tensor = torch.unsqueeze(transformed_tensor['image'], 0)
     # Print the shape of the transformed tensor
 
-    print(tensor.shape)  # output: torch.Size([1, 256, 256])
+    # output: torch.Size([1, 256, 256])
     return tensor
+

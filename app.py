@@ -84,7 +84,7 @@ if selected == 'View':
         st.write("Yet to upload a file")
 
 if selected == '2D Model':
-    selectedZone = option_menu(None, ["Prostate", 'Pheripheral','Transition'], 
+    selectedZone = option_menu(None, ["Prostate", 'Pheripheral','Transition','Lesion'], 
             icons=['', '','',''], 
             menu_icon="cast", default_index=0, orientation="horizontal"
             )
@@ -108,10 +108,10 @@ if selected == '2D Model':
         
         labels = []
         images = []
-
+        spatial_size = [128, 128]
         for i in range(total_slize_size):
             newimg = image_slices[i].squeeze() 
-            spatial_size = [128, 128]
+            
             transformed_image = transform(newimg, spatial_size)
             
             label = model(transformed_image)
@@ -126,8 +126,8 @@ if selected == '2D Model':
 
 if selected == '3D Model':
     
-    selectedZone = option_menu(None, ["Prostate", 'Pheripheral','Transition'], 
-            icons=['', '','',''], 
+    selectedZone = option_menu(None, ["Prostate", 'Pheripheral','Transition','Lesion'], 
+            icons=['', '','','', ''], 
             menu_icon="cast", default_index=0, orientation="horizontal"
             )
     
@@ -150,7 +150,6 @@ if selected == '3D Model':
         
         label = model(transformed_image)
         
-        st.text(label.shape)
         session_state.labeled = True
         plot_image_label(transformed_image, label)
     else:

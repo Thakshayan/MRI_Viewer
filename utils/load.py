@@ -4,6 +4,7 @@ from monai.networks.layers import Norm
 import os
 import streamlit as st
 from .Models.DD_Models.UNet import UNet as UNet2D
+from .Models.DDD_Models.ModifiedUNet import MNet as MNet2D
 
 @st.cache_resource
 def load_model(model_path):
@@ -26,10 +27,12 @@ def load_model(model_path):
 @st.cache_resource
 def load_model2D(model_path):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
     model = UNet2D().to(device)
     if (os.path.exists(model_path)):
         model.load_state_dict(torch.load(
-        os.path.join(model_path)))
+        os.path.join(model_path),map_location=device))
+
     return model
 
 

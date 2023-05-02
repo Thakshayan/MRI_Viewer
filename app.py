@@ -6,8 +6,8 @@ import numpy as np
 from streamlit import session_state
 from streamlit_option_menu import option_menu
 from utils.view import plot_slice, plot_image_label, plot_2D_image_label
-from utils.load import load_model, load_model2D
-from utils.transform import transform
+from utils.load import load_model, load_model2D, load_lesion_model, load_gleason_model
+from utils.transform import transform, lesion_transform
 
 st.set_page_config(
     page_title="Doc ASk",
@@ -84,8 +84,8 @@ if selected == 'View':
         st.write("Yet to upload a file")
 
 if selected == '2D Model':
-    selectedZone = option_menu(None, ["Prostate", 'Pheripheral','Transition','Lesion'], 
-            icons=['', '','',''], 
+    selectedZone = option_menu(None, ["Prostate", 'Pheripheral','Transition'], 
+            icons=['', '',''], 
             menu_icon="cast", default_index=0, orientation="horizontal"
             )
     
@@ -134,23 +134,73 @@ if selected == '3D Model':
     st.title("Predicted By 3D Model")
     if 'file_path' in session_state and session_state.file_path:
         # # horizontal Menu
-       
-        if selectedZone == 'Prostate':
-            model_path = './saved_models/3D_Models/prostate/best_metric_model.pth'
-        if selectedZone == 'Pheripheral':
-            model_path = './saved_models/3D_Models/pheripheral/best_metric_model.pth'
-        if selectedZone == 'Transition':
-            model_path = './saved_models/3D_Models/transition/best_metric_model.pth'
+        if selectedZone == 'Lesion':
+            if selectedZone == 'Prostate':
+                model_path = './saved_models/3D_Models/prostate/best_metric_model.pth'
+            if selectedZone == 'Pheripheral':
+                model_path = './saved_models/3D_Models/pheripheral/best_metric_model.pth'
+            if selectedZone == 'Transition':
+                model_path = './saved_models/3D_Models/transition/best_metric_model.pth'
         
-        model = load_model(model_path)
-        nifti_image = nib.load(session_state.file_path)
-        image_data = nifti_image.get_fdata()
-        spatial_size = [128, 128, 16]
-        transformed_image = transform(image_data, spatial_size)
         
-        label = model(transformed_image)
+            model = load_model(model_path)
+            nifti_image = nib.load(session_state.file_path)
+            image_data = nifti_image.get_fdata()
+            spatial_size = [128, 128, 16]
+            transformed_image = transform(image_data, spatial_size)
+            
+            label = model(transformed_image)
+            
+            session_state.labeled = True
+            plot_image_label(transformed_image, label)
+        else:
+            lesion_model_path = './saved_models/3D_Models/lesion/best_metric_model.pth'
+            Gleason_model_path = './saved_models/3D_Models/gleason/best_metric_model.pth'
+            prostate_model_path = './saved_models/3D_Models/prostate/best_metric_model.pth'
+            pheripheral_model_path = './saved_models/3D_Models/pheripheral/best_metric_model.pth'
+            transition_model_path =  './saved_models/3D_Models/transition/best_metric_model.pth'
         
-        session_state.labeled = True
-        plot_image_label(transformed_image, label)
+
+            lesion_model = load_lesion_model(lesion_model_path)
+            gleason_model = load_gleason_model(Gleason_model_path)
+            prostate_model = load_model(model_path)
+            transition_model = load_model(model_path)
+            pheripheral_model = load_model(model_path)
+
+            nifti_image = nib.load(session_state.file_path)
+            image_data = nifti_image.get_fdata()
+            spatial_size = [128, 128, 16]
+            transformed_image = transform(image_data, spatial_size)
+            
+            prostate_label = prostate_model(transformed_image)
+            transition_label = transition_model(transformed_image)
+            pheripheral_label = pheripheral_model(transformed_image)
+
+            image_array = {
+                "image" : transformed_image, 
+                "PZ" : pheripheral_label, 
+                "TZ" : transition_label, 
+                "prostate" : prostate_label
+            }
+            
+            transform_lesion_image = lesion_transform(image_array)
+
+            lesion_label = lesion_model(transform_lesion_image)
+            gleason_score = gleason_model(transform_lesion_image)
+
+            score = np.argmax(gleason_score)+1
+
+            if score < 3 :
+                st.success(f"Predicted Gleason Score: {score}")
+                st.success(f"Predicted Gleason Score Accuray: {gleason_score[score-1]}")
+                st.success("Indicate No Biopsy Needed")
+            else:
+                st.error(f"Predicted Gleason Score: {score}")
+                st.success(f"Predicted Gleason Score Accuray: {gleason_score[score-1]}")
+                st.error("Indicate Biopsy Needed")
+
+            session_state.labeled = True
+            plot_image_label(transformed_image, lesion_label)
+            
     else:
         st.write("Yet to upload a file")

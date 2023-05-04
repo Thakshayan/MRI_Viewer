@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class BB_classifier(nn.Module):
     def __init__(self, n_input_channels=256, n_features=64, n_output_channels=6, anchor_stride=2, dim=3):
         super(BB_classifier, self).__init__()
@@ -11,19 +12,19 @@ class BB_classifier(nn.Module):
             nn.Conv3d(n_input_channels, n_features, kernel_size=3, stride=anchor_stride, padding=1),
             nn.BatchNorm3d(n_features),
             nn.ReLU(inplace=True),
-          
+            #nn.Dropout3d(p=0.25),
             nn.Conv3d(n_features, n_features, kernel_size=3, stride=anchor_stride, padding=1),
             nn.BatchNorm3d(n_features),
             nn.ReLU(inplace=True),
-           
+            #nn.Dropout3d(p=0.25), 
             nn.Conv3d(n_features, n_features, kernel_size=3, stride=anchor_stride, padding=1),
             nn.BatchNorm3d(n_features),
             nn.ReLU(inplace=True),
-           
+            #nn.Dropout3d(p=0.25),
             nn.Conv3d(n_features, n_features, kernel_size=3, stride=anchor_stride, padding=1),
             nn.BatchNorm3d(n_features),
             nn.ReLU(inplace=True),
-        
+            #nn.Dropout3d(p=0.25),
             nn.Conv3d(n_features, n_output_channels, kernel_size=3, stride=anchor_stride, padding=1)
         )
 
@@ -48,16 +49,18 @@ from torch.nn.modules.conv import Conv3d
 import torch
 import torch.nn as nn
 
+
+
 def double_conv(in_channels, out_channels):
     return nn.Sequential(
             nn.Conv3d(in_channels, out_channels, kernel_size=3, padding=1),
             nn.BatchNorm3d(out_channels),
             nn.ReLU(inplace=True),
-           
+            nn.Dropout3d(p=0.5),
             nn.Conv3d(out_channels, out_channels, kernel_size=3, padding=1),
             nn.BatchNorm3d(out_channels),
-            nn.ReLU(inplace=True)
-          
+            nn.ReLU(inplace=True),
+            nn.Dropout3d(p=0.5)
         )  
 
 class MNetWithBBClassifier(nn.Module):

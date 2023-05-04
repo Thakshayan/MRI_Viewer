@@ -7,8 +7,10 @@ def double_conv(in_channels, out_channels):
     return nn.Sequential(
         nn.Conv2d(in_channels, out_channels, 3, padding=1),
         nn.ReLU(inplace=True),
+        nn.Dropout2d(0.5),
         nn.Conv2d(out_channels, out_channels, 3, padding=1),
-        nn.ReLU(inplace=True)
+        nn.ReLU(inplace=True),
+        nn.Dropout2d(0.5)
     )   
 
 

@@ -134,7 +134,7 @@ if selected == '3D Model':
     st.title("Predicted By 3D Model")
     if 'file_path' in session_state and session_state.file_path:
         # # horizontal Menu
-        if selectedZone == 'Lesion':
+        if selectedZone != 'Lesion':
             if selectedZone == 'Prostate':
                 model_path = './saved_models/3D_Models/prostate/best_metric_model.pth'
             if selectedZone == 'Pheripheral':
@@ -163,9 +163,9 @@ if selected == '3D Model':
 
             lesion_model = load_lesion_model(lesion_model_path)
             gleason_model = load_gleason_model(Gleason_model_path)
-            prostate_model = load_model(model_path)
-            transition_model = load_model(model_path)
-            pheripheral_model = load_model(model_path)
+            prostate_model = load_model(prostate_model_path)
+            transition_model = load_model(pheripheral_model_path)
+            pheripheral_model = load_model(transition_model_path)
 
             nifti_image = nib.load(session_state.file_path)
             image_data = nifti_image.get_fdata()
@@ -182,6 +182,7 @@ if selected == '3D Model':
                 "TZ" : transition_label, 
                 "prostate" : prostate_label
             }
+           
             
             transform_lesion_image = lesion_transform(image_array)
 
@@ -190,13 +191,14 @@ if selected == '3D Model':
 
             score = np.argmax(gleason_score)+1
 
+
             if score < 3 :
                 st.success(f"Predicted Gleason Score: {score}")
-                st.success(f"Predicted Gleason Score Accuray: {gleason_score[score-1]}")
+                st.success(f"Predicted Gleason Score Accuray: {gleason_score[0][score-1].detach().numpy():.4f}")
                 st.success("Indicate No Biopsy Needed")
             else:
                 st.error(f"Predicted Gleason Score: {score}")
-                st.success(f"Predicted Gleason Score Accuray: {gleason_score[score-1]}")
+                st.success(f"Predicted Gleason Score Accuray: {gleason_score[0][score-1].detach().numpy():.4f}")
                 st.error("Indicate Biopsy Needed")
 
             session_state.labeled = True

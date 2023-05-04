@@ -49,7 +49,7 @@ class MNet(nn.Module):
 
         mid = self.e2_e4(conv2)
         mid = self.maxpool(mid)
-        print(mid.shape, x.shape)
+
         x = torch.cat([mid,x], dim=1)
         x = self.conv_mid1(x)
 

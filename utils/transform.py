@@ -47,22 +47,23 @@ def lesion_transform(image_array, spatial_size=[128, 128, 16]):
     a_max=500
 
     transformation = Compose([
-        LoadImaged(keys=["image", "PZ", "TZ", "prostate"], reader="ITKReader"),
+        
         AddChanneld(keys=["image", "PZ", "TZ", "prostate"]),
+        SqueezeDimd(keys=["image", "PZ", "TZ", "prostate"]),
+        SqueezeDimd(keys=["image", "PZ", "TZ", "prostate"]),
         Orientationd(keys=["image", "PZ", "TZ", "prostate"], axcodes="RAS"),
         ScaleIntensityRanged(keys=["image"], a_min=a_min, a_max=a_max, b_min=0.0, b_max=1.0, clip=True),
         CropForegroundd(keys=["image", "PZ", "TZ", "prostate"], source_key="image"),
-        Resized(keys=["image", "PZ", "TZ", "prostate"], spatial_size=spatial_size),
         ConcatImagesd(keys=["image", "PZ", "TZ", "prostate"]),
         ToTensord(keys=["image"]),
-        SqueezeDimd(keys=["image"]),
+        SqueezeDimd(keys=["image"])
     ])
     # Apply the transformations to the numpy image
     transformed_tensor = transformation(image_array)
     #tensor_batch = transformed_tensor.unsqueeze(0)
+    
     tensor = torch.unsqueeze(transformed_tensor['image'], 0)
     # Print the shape of the transformed tensor
-
-    
+  
     return tensor
 

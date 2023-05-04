@@ -189,16 +189,16 @@ if selected == '3D Model':
             lesion_label = lesion_model(transform_lesion_image)
             gleason_score = gleason_model(transform_lesion_image)
 
-            score = np.argmax(gleason_score)+1
+            score = np.argmax(gleason_score)
 
 
-            if score < 3 :
+            if score < 2 :
                 st.success(f"Predicted Gleason Score: {score}")
-                st.success(f"Predicted Gleason Score Accuray: {gleason_score[0][score-1].detach().numpy():.4f}")
+                st.success(f"Predicted Gleason Score Accuray: {gleason_score[0][score].detach().numpy():.4f}")
                 st.success("Indicate No Biopsy Needed")
             else:
                 st.error(f"Predicted Gleason Score: {score}")
-                st.success(f"Predicted Gleason Score Accuray: {gleason_score[0][score-1].detach().numpy():.4f}")
+                st.success(f"Predicted Gleason Score Accuray: {gleason_score[0][score].detach().numpy():.4f}")
                 st.error("Indicate Biopsy Needed")
 
             session_state.labeled = True

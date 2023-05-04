@@ -61,4 +61,5 @@ def load_gleason_model(model_path):
     if (os.path.exists(model_path)):
         model.load_state_dict(torch.load(
         os.path.join(model_path),map_location=device))
+        print("Model Loaded")
     return model

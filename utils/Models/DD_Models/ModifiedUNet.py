@@ -1,20 +1,21 @@
-
 from torch.nn.modules.conv import Conv2d
 import torch
 import torch.nn as nn
 
+
 def double_conv(in_channels, out_channels):
     return nn.Sequential(
-        nn.Conv2d(in_channels, out_channels, 3, padding=1),
+        nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
+        nn.BatchNorm2d(out_channels),
         nn.ReLU(inplace=True),
-        nn.Dropout2d(0.5),
-        nn.Conv2d(out_channels, out_channels, 3, padding=1),
+        nn.Dropout2d(p=0.25),
+        nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
+        nn.BatchNorm2d(out_channels),
         nn.ReLU(inplace=True),
-        nn.Dropout2d(0.5)
-    )   
+        nn.Dropout2d(p=0.25)
+    )
 
-
-class ModifiedNet(nn.Module):
+class MNet(nn.Module):
 
     def __init__(self):
         super().__init__()
@@ -84,6 +85,6 @@ class ModifiedNet(nn.Module):
 
 if __name__ == "__main__":
   
-  x = ModifiedNet()
+  x = MNet()
   print(sum(p.numel() for p in x.parameters()))
   print(x(torch.randn(1,1,128,128)).shape)

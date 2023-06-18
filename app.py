@@ -7,7 +7,7 @@ from streamlit import session_state
 from streamlit_option_menu import option_menu
 from utils.view import plot_slice, plot_image_label, plot_2D_image_label
 from utils.load import load_model, load_model2D, load_lesion_model, load_gleason_model
-from utils.transform import transform, lesion_transform
+from utils.transform import transform, lesion_transform, remove_slices
 
 st.set_page_config(
     page_title="Doc ASk",
@@ -118,9 +118,7 @@ if selected == '2D Model':
             images.append(transformed_image)
             labels.append(label)
         plot_2D_image_label(images, labels)
-        
-        
-        
+            
     else:
         st.write("Yet to upload a file")
 
@@ -145,6 +143,8 @@ if selected == '3D Model':
         
             model = load_model(model_path)
             nifti_image = nib.load(session_state.file_path)
+            if nifti_image.shape[2] > 16:
+                nifti_image = remove_slices(nifti_image)
             image_data = nifti_image.get_fdata()
             spatial_size = [128, 128, 16]
             transformed_image = transform(image_data, spatial_size)
@@ -192,14 +192,21 @@ if selected == '3D Model':
             score = np.argmax(gleason_score)
 
 
-            if score < 2 :
+            if score < 1 :
                 st.success(f"Predicted Gleason Score: {score}")
                 st.success(f"Predicted Gleason Score Accuray: {gleason_score[0][score].detach().numpy():.4f}")
                 st.success("Indicate No Biopsy Needed")
+            elif score ==2:
+                st.error(f"Predicted Gleason Score: {score}")
+                st.success(f"Predicted Gleason Score Accuray: {gleason_score[0][score].detach().numpy():.4f}")
+                st.success("Indicate intermediate")
             else:
                 st.error(f"Predicted Gleason Score: {score}")
                 st.success(f"Predicted Gleason Score Accuray: {gleason_score[0][score].detach().numpy():.4f}")
-                st.error("Indicate Biopsy Needed")
+                if score == 3:
+                    st.error("Indicate Biopsy Needed (Intermediate Unfavorable)")
+                else:
+                    st.error("Indicate Biopsy Needed (High Risk)")
 
             session_state.labeled = True
             plot_image_label(transformed_image, lesion_label)

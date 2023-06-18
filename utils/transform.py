@@ -1,13 +1,23 @@
 import numpy as np
 from monai.transforms import Compose, AddChanneld,Spacingd,Orientationd,LoadImaged,Resized,SqueezeDimd, ScaleIntensityRanged,CropForegroundd, ToTensord
 import torch
+import nibabel as nib
+
+def remove_slices(img):
+  l = img.shape[2]
+  start = l // 2 - 8  
+  end = l // 2 + 8
+  imgvol = np.array( img.dataobj )
+  imgvol = imgvol[ :, :, start:end ]
+  newimg = nib.Nifti1Image ( imgvol, img.affine )
+  return newimg
 
 def transform(image_array, spatial_size=[128, 128, 16]):
     # Example numpy array with shape (H, W)
 
     pixdim =(1.5, 1.5, 1.0)
     a_min=0
-    a_max=500
+    a_max=1000
 
     transformation = Compose([
         lambda x: {"image": x},

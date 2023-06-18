@@ -37,7 +37,7 @@ def plot_image_label(image, label):
     alpha[slice_label > 0.5] = 0.4
 
     # Display label image
-    ax.imshow(slice_label, cmap='jet', alpha=alpha)
+    ax.imshow(slice_label, cmap='Reds', alpha=alpha)
 
     # Add colorbar for label image
     #cbar = plt.colorbar(ax.imshow(label, cmap='jet', alpha=1))
